@@ -534,7 +534,120 @@
 
 
 <!-- ══════════════════════════════════════
-     7. CSP APP ANGLE
+     7. OS FPV SIMULATION
+     ══════════════════════════════════════ -->
+<section class="section">
+  <div class="tag"><span class="dot"></span>OS Simulation — FPV Track</div>
+  <h2>If the OS had been running,<br>where would the <span class="pink">150 sit today?</span></h2>
+  <p class="big-p">Two violation types matter for the FPV track. <strong style="color:#111827;">Disintermediation</strong> — a CSP routing customers away from Wiom onto their own infrastructure. <strong style="color:#111827;">Extra cash collection</strong> — charging customers outside the Wiom system. Exit rules aren't fully defined yet, but we can already see who would be flagged, how severely, and whether the pattern is different in the 150 vs the rest of Delhi.</p>
+
+  <!-- Four bucket cards -->
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:36px;">
+    <div style="background:#f0fdf4; border:1.5px solid #a7f3d0; border-radius:12px; padding:22px 18px; text-align:center;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#059669; margin-bottom:10px;">No violations</div>
+      <div style="font-size:42px; font-weight:900; color:#059669; line-height:1;">88</div>
+      <div style="font-size:12px; color:#9ca3af; margin-top:8px;">59% of the 150</div>
+      <div style="font-size:13px; color:#4b5563; margin-top:12px; line-height:1.55;">Clean on FPV. Their case rests entirely on service metrics.</div>
+    </div>
+    <div style="background:#fff5f9; border:1.5px solid #f9c0dc; border-radius:12px; padding:22px 18px; text-align:center;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#d92b90; margin-bottom:10px;">Disintermediation only</div>
+      <div style="font-size:42px; font-weight:900; color:#d92b90; line-height:1;">24</div>
+      <div style="font-size:12px; color:#9ca3af; margin-top:8px;">16% of the 150</div>
+      <div style="font-size:13px; color:#4b5563; margin-top:12px; line-height:1.55;">Flagged for routing customers away from Wiom. No extra-cash cases.</div>
+    </div>
+    <div style="background:#fff8f0; border:1.5px solid #fed7aa; border-radius:12px; padding:22px 18px; text-align:center;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#d97706; margin-bottom:10px;">Extra cash only</div>
+      <div style="font-size:42px; font-weight:900; color:#d97706; line-height:1;">20</div>
+      <div style="font-size:12px; color:#9ca3af; margin-top:8px;">13% of the 150</div>
+      <div style="font-size:13px; color:#4b5563; margin-top:12px; line-height:1.55;">Flagged for charging customers outside the Wiom system. No disintermediation cases.</div>
+    </div>
+    <div style="background:#fff0f0; border:1.5px solid #fca5a5; border-radius:12px; padding:22px 18px; text-align:center;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#dc2626; margin-bottom:10px;">Both violations</div>
+      <div style="font-size:42px; font-weight:900; color:#dc2626; line-height:1;">18</div>
+      <div style="font-size:12px; color:#9ca3af; margin-top:8px;">12% of the 150</div>
+      <div style="font-size:13px; color:#4b5563; margin-top:12px; line-height:1.55;">Two independent customer-harming behaviours confirmed. 15 of these 18 are not yet on exit track.</div>
+    </div>
+  </div>
+
+  <!-- Severity table -->
+  <div style="margin-top:40px;">
+    <h3>Disintermediation — severity breakdown</h3>
+    <p style="font-size:14px; color:#6b7280; margin-top:6px; max-width:680px;">Of the 42 CSPs flagged for disintermediation, how many times have they been caught? The case count tells you whether this looks like an accident, a pattern, or deliberate behaviour.</p>
+    <div style="margin-top:20px; overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:14px;">
+        <thead>
+          <tr style="border-bottom:2px solid #e5e7eb;">
+            <th style="text-align:left; padding:10px 12px; color:#6b7280; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:1px; width:120px;">Case count</th>
+            <th style="text-align:left; padding:10px 12px; color:#6b7280; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:1px;">What it signals</th>
+            <th style="text-align:center; padding:10px 12px; color:#d92b90; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:1px;">Bottom 150<br><span style="font-weight:400; font-size:11px;">penalty applied</span></th>
+            <th style="text-align:center; padding:10px 12px; color:#d97706; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:1px;">Bottom 150<br><span style="font-weight:400; font-size:11px;">warning stage</span></th>
+            <th style="text-align:center; padding:10px 12px; color:#059669; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:1px;">Other Delhi 653<br><span style="font-weight:400; font-size:11px;">penalty applied</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="padding:12px; font-weight:600; color:#111827;">1 case</td>
+            <td style="padding:12px; color:#6b7280; font-size:13px; line-height:1.5;">Could be an edge case or isolated incident</td>
+            <td style="padding:12px; text-align:center; font-weight:700; color:#d92b90;">11 CSPs</td>
+            <td style="padding:12px; text-align:center; font-weight:700; color:#d97706;">18 CSPs</td>
+            <td style="padding:12px; text-align:center; font-weight:700; color:#059669;">34 CSPs</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f0f0f0; background:#fafafa;">
+            <td style="padding:12px; font-weight:600; color:#111827;">2 cases</td>
+            <td style="padding:12px; color:#6b7280; font-size:13px; line-height:1.5;">Pattern — caught twice means behaviour, not accident</td>
+            <td style="padding:12px; text-align:center; font-weight:700; color:#d92b90;">8 CSPs</td>
+            <td style="padding:12px; text-align:center; font-weight:700; color:#d97706;">7 CSPs</td>
+            <td style="padding:12px; text-align:center; font-weight:700; color:#059669;">4 CSPs</td>
+          </tr>
+          <tr style="background:#fff5f9;">
+            <td style="padding:12px; font-weight:700; color:#d92b90;">3+ cases</td>
+            <td style="padding:12px; color:#6b7280; font-size:13px; line-height:1.5;">Deliberate — repeated confirmed violations</td>
+            <td style="padding:12px; text-align:center; font-size:20px; font-weight:900; color:#d92b90;">7 CSPs</td>
+            <td style="padding:12px; text-align:center; font-size:20px; font-weight:900; color:#d97706;">10 CSPs</td>
+            <td style="padding:12px; text-align:center; font-size:20px; font-weight:900; color:#059669;">1 CSP</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px; padding:14px 18px; background:#fafafa; border:1px solid #e5e7eb; border-radius:8px;">
+      <p style="font-size:13px; color:#4b5563; margin:0; max-width:none; line-height:1.7;">The 3+ case group is almost entirely a bottom 150 problem. The other 653 — a group 4× larger — has produced exactly <strong style="color:#111827;">one</strong> repeat disintermediation offender at the penalty stage.</p>
+    </div>
+  </div>
+
+  <!-- Side-by-side comparison -->
+  <div style="margin-top:36px;">
+    <h3 style="margin-bottom:16px;">Bottom 150 vs other 653 — full picture</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+      <div style="background:#fff5f9; border:1.5px solid #f9c0dc; border-radius:12px; padding:22px 24px;">
+        <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#d92b90; margin-bottom:16px;">Bottom 150</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; font-size:14px;"><span style="color:#6b7280;">No violations</span><span style="font-weight:700; color:#111827;">88 <span style="font-weight:400; color:#9ca3af; font-size:12px;">(59%)</span></span></div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; font-size:14px;"><span style="color:#6b7280;">Disintermediation only</span><span style="font-weight:700; color:#d92b90;">24 <span style="font-weight:400; color:#9ca3af; font-size:12px;">(16%)</span></span></div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; font-size:14px;"><span style="color:#6b7280;">Extra cash only</span><span style="font-weight:700; color:#d97706;">20 <span style="font-weight:400; color:#9ca3af; font-size:12px;">(13%)</span></span></div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; font-size:14px; margin-top:4px; padding-top:12px; border-top:1px solid #f9c0dc;"><span style="color:#6b7280; font-weight:600;">Both violations</span><span style="font-weight:800; color:#dc2626;">18 <span style="font-weight:400; color:#9ca3af; font-size:12px;">(12%)</span></span></div>
+        </div>
+      </div>
+      <div style="background:#f0fdf4; border:1.5px solid #a7f3d0; border-radius:12px; padding:22px 24px;">
+        <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#059669; margin-bottom:16px;">Other Delhi 653</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; font-size:14px;"><span style="color:#6b7280;">No violations</span><span style="font-weight:700; color:#111827;">433 <span style="font-weight:400; color:#9ca3af; font-size:12px;">(66%)</span></span></div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; font-size:14px;"><span style="color:#6b7280;">Disintermediation only</span><span style="font-weight:700; color:#d92b90;">76 <span style="font-weight:400; color:#9ca3af; font-size:12px;">(12%)</span></span></div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; font-size:14px;"><span style="color:#6b7280;">Extra cash only</span><span style="font-weight:700; color:#d97706;">107 <span style="font-weight:400; color:#9ca3af; font-size:12px;">(16%)</span></span></div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; font-size:14px; margin-top:4px; padding-top:12px; border-top:1px solid #a7f3d0;"><span style="color:#6b7280; font-weight:600;">Both violations</span><span style="font-weight:800; color:#dc2626;">37 <span style="font-weight:400; color:#9ca3af; font-size:12px;">(6%)</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Honest note -->
+  <div class="note-box" style="margin-top:20px;">
+    <p><strong style="color:#111827;">What this section is and isn't:</strong> Exit consequence thresholds aren't defined yet — so this isn't a verdict, it's a sense check. What it shows: disintermediation is meaningfully more concentrated in the bottom 150, especially repeat offending. The "both violations" group (12% vs 6%) is a 2× gap. But 59% of the bottom 150 have no FPV violations at all — their intervention sits on service metrics alone, which is what the compliance and capability reset track is being built to handle.</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     8. CSP APP ANGLE
      ══════════════════════════════════════ -->
 <section class="section">
   <div class="tag"><span class="dot"></span>CSP App Rollout</div>
