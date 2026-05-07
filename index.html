@@ -668,17 +668,184 @@
 
 
 <!-- ══════════════════════════════════════
-     7. ACTION — WIP
+     7. OS COMPLIANCE — THE 150 UNDER THE SYSTEM
      ══════════════════════════════════════ -->
-<section class="section">
-  <div class="tag"><span class="dot"></span>Action</div>
-  <h2>What does the OS say about<br>each of these 150 CSPs?</h2>
-  <p class="big-p">Mapping the 150 against OS operating status — earning bands, capability resets, strike thresholds — to identify which CSPs are already flagged internally and where the escalation case is strongest.</p>
+<style>
+  /* OS compliance section styles */
+  .os-compliance-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px;
+  }
+  .osc-card {
+    border-radius: 14px; padding: 26px 22px; text-align: center;
+  }
+  .osc-nc  { background: #fff5f9; border: 1.5px solid #f9c0dc; }
+  .osc-ar  { background: #fffbeb; border: 1.5px solid #fde68a; }
+  .osc-ok  { background: #f0fdf4; border: 1.5px solid #a7f3d0; }
+  .osc-card .osc-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .osc-nc .osc-label  { color: #d92b90; }
+  .osc-ar .osc-label  { color: #d97706; }
+  .osc-ok .osc-label  { color: #059669; }
+  .osc-card .osc-big  { font-size: 52px; font-weight: 900; line-height: 1; }
+  .osc-nc .osc-big    { color: #d92b90; }
+  .osc-ar .osc-big    { color: #d97706; }
+  .osc-ok .osc-big    { color: #059669; }
+  .osc-card .osc-pct  { font-size: 16px; font-weight: 700; margin-top: 4px; opacity: 0.8; }
+  .osc-card .osc-rest { font-size: 12px; color: #9ca3af; margin-top: 10px; line-height: 1.5; }
+  .osc-card .osc-delta { font-weight: 700; }
 
-  <div class="wip-box">
-    <div class="wip-badge">⏳ &nbsp; In Progress</div>
-    <h3>OS Simulation Results — Incoming</h3>
-    <p>Once the OS simulation runs against these 150 CSP IDs, this section maps each CSP to their OS status. For the chronic group especially — if they're already flagged internally, the offboarding case writes itself.</p>
+  /* Domain bars */
+  .os-domain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
+  .osd-card { border-radius: 12px; padding: 24px 20px; background: #fafafa; border: 1px solid #e5e7eb; }
+  .osd-card .osd-name { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #6b7280; margin-bottom: 16px; }
+  .osd-card .osd-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .osd-card .osd-grp  { font-size: 12px; color: #9ca3af; }
+  .osd-card .osd-pct  { font-size: 13px; font-weight: 700; }
+  .osd-worst { color: #d92b90; }
+  .osd-rest  { color: #059669; }
+  .osd-bar-wrap { height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+  .osd-bar-fill { height: 100%; border-radius: 4px; }
+  .osd-fill-worst { background: #f9c0dc; }
+  .osd-fill-rest  { background: #a7f3d0; }
+  .osd-delta-badge {
+    margin-top: 14px; padding-top: 12px; border-top: 1px solid #e5e7eb;
+    font-size: 12px; font-weight: 700; color: #d92b90; text-align: center;
+  }
+
+  /* Capability reset cards */
+  .cap-reset-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
+  .cr-card { background: #fff; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 22px 18px; border-top: 3px solid; }
+  .cr-card.cr-1 { border-top-color: #d92b90; }
+  .cr-card.cr-2 { border-top-color: #d97706; }
+  .cr-card.cr-3 { border-top-color: #6366f1; }
+  .cr-card .cr-rank { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .cr-card.cr-1 .cr-rank { color: #d92b90; }
+  .cr-card.cr-2 .cr-rank { color: #d97706; }
+  .cr-card.cr-3 .cr-rank { color: #6366f1; }
+  .cr-card .cr-domain { font-size: 15px; font-weight: 800; color: #111827; margin-bottom: 8px; }
+  .cr-card .cr-stat   { font-size: 22px; font-weight: 900; margin-bottom: 4px; }
+  .cr-card.cr-1 .cr-stat { color: #d92b90; }
+  .cr-card.cr-2 .cr-stat { color: #d97706; }
+  .cr-card.cr-3 .cr-stat { color: #6366f1; }
+  .cr-card .cr-sub    { font-size: 12px; color: #9ca3af; margin-bottom: 12px; }
+  .cr-card .cr-desc   { font-size: 13px; color: #4b5563; line-height: 1.6; }
+</style>
+
+<section class="section">
+  <div class="tag"><span class="dot"></span>OS — Compliance Track</div>
+  <h2>Under the OS, the 150 are<br>overwhelmingly <span class="pink">non-compliant.</span></h2>
+  <p class="big-p">The compliance track measures three domains: install performance, service resolution, and complaint experience. Stability is excluded from this recomputation. Here is where the 150 sit — and where the reset needs to land.</p>
+
+  <!-- COMPLIANCE BUCKETS -->
+  <h3 style="margin-top:40px; margin-bottom:4px;">Overall compliance — the 150</h3>
+  <p style="margin-top:6px; font-size:14px; color:#9ca3af;">vs Rest 653 shown below each figure</p>
+
+  <div class="os-compliance-row">
+    <div class="osc-card osc-nc">
+      <div class="osc-label">Non-compliant</div>
+      <div class="osc-big">122</div>
+      <div class="osc-pct">81.6% of 150</div>
+      <div class="osc-rest">Rest 653: 38.1% <span class="osc-delta" style="color:#d92b90;">+43pp worse</span></div>
+    </div>
+    <div class="osc-card osc-ar">
+      <div class="osc-label">At risk</div>
+      <div class="osc-big">27</div>
+      <div class="osc-pct">17.7% of 150</div>
+      <div class="osc-rest">Rest 653: 53.2% — most of the rest sit here</div>
+    </div>
+    <div class="osc-card osc-ok">
+      <div class="osc-label">Compliant</div>
+      <div class="osc-big">1</div>
+      <div class="osc-pct">0.7% of 150</div>
+      <div class="osc-rest">Rest 653: 8.6% <span class="osc-delta" style="color:#9ca3af;">12× more</span></div>
+    </div>
+  </div>
+
+  <div class="bridge" style="margin-top:18px;">
+    <p>For the rest of Delhi, half are <em>at-risk</em> — a manageable signal the OS is designed to catch early. For the bottom 150, the at-risk band has nearly emptied: they've moved past it. Four in five are already non-compliant.</p>
+  </div>
+
+  <!-- DOMAIN BREAKDOWN -->
+  <h3 style="margin-top:44px; margin-bottom:4px;">Where they fail — by domain</h3>
+  <p style="margin-top:6px; font-size:14px; color:#9ca3af;">% of CSPs rated Compliant in each domain (higher = better)</p>
+
+  <div class="os-domain-grid">
+    <!-- Service Resolution -->
+    <div class="osd-card" style="border-color:#f9c0dc; background:#fff5f9;">
+      <div class="osd-name">Service Resolution</div>
+      <div class="osd-row">
+        <span class="osd-grp">Bottom 150</span>
+        <span class="osd-pct osd-worst">9.9%</span>
+      </div>
+      <div class="osd-bar-wrap"><div class="osd-bar-fill osd-fill-worst" style="width:9.9%;"></div></div>
+      <div class="osd-row" style="margin-top:8px;">
+        <span class="osd-grp">Rest 653</span>
+        <span class="osd-pct osd-rest">42.7%</span>
+      </div>
+      <div class="osd-bar-wrap"><div class="osd-bar-fill osd-fill-rest" style="width:42.7%;"></div></div>
+      <div class="osd-delta-badge">Gap: −32.8pp &nbsp;·&nbsp; Biggest miss</div>
+    </div>
+    <!-- Install -->
+    <div class="osd-card">
+      <div class="osd-name">Install Performance</div>
+      <div class="osd-row">
+        <span class="osd-grp">Bottom 150</span>
+        <span class="osd-pct osd-worst">14.9%</span>
+      </div>
+      <div class="osd-bar-wrap"><div class="osd-bar-fill osd-fill-worst" style="width:14.9%;"></div></div>
+      <div class="osd-row" style="margin-top:8px;">
+        <span class="osd-grp">Rest 653</span>
+        <span class="osd-pct osd-rest">22.8%</span>
+      </div>
+      <div class="osd-bar-wrap"><div class="osd-bar-fill osd-fill-rest" style="width:22.8%;"></div></div>
+      <div class="osd-delta-badge" style="color:#6b7280;">Gap: −7.9pp</div>
+    </div>
+    <!-- Complaint Experience -->
+    <div class="osd-card">
+      <div class="osd-name">Complaint Experience</div>
+      <div class="osd-row">
+        <span class="osd-grp">Bottom 150</span>
+        <span class="osd-pct osd-worst">4.3%</span>
+      </div>
+      <div class="osd-bar-wrap"><div class="osd-bar-fill osd-fill-worst" style="width:4.3%;"></div></div>
+      <div class="osd-row" style="margin-top:8px;">
+        <span class="osd-grp">Rest 653</span>
+        <span class="osd-pct osd-rest">12.3%</span>
+      </div>
+      <div class="osd-bar-wrap"><div class="osd-bar-fill osd-fill-rest" style="width:12.3%;"></div></div>
+      <div class="osd-delta-badge" style="color:#6b7280;">Gap: −8.0pp &nbsp;·&nbsp; Lowest pass rate</div>
+    </div>
+  </div>
+
+  <!-- CAPABILITY RESET -->
+  <h3 style="margin-top:44px; margin-bottom:4px;">Where the capability reset needs to land</h3>
+  <p style="margin-top:6px; font-size:14px; color:#9ca3af;">Ranked by gap size and what the metric reveals</p>
+
+  <div class="cap-reset-row">
+    <div class="cr-card cr-1">
+      <div class="cr-rank">Priority 1 — Biggest gap</div>
+      <div class="cr-domain">Resolution TAT</div>
+      <div class="cr-stat">−33pp</div>
+      <div class="cr-sub">compliant rate vs rest</div>
+      <div class="cr-desc">Only 9.9% of the 150 pass service resolution. At the median, they resolve within TAT 45% of the time vs 75% for rest. The gap is consistent across every percentile — this isn't a few bad actors, it's a system behaviour.</div>
+    </div>
+    <div class="cr-card cr-2">
+      <div class="cr-rank">Priority 2 — Lowest pass rate</div>
+      <div class="cr-domain">Complaint Handling</div>
+      <div class="cr-stat">4.3%</div>
+      <div class="cr-sub">pass complaint experience</div>
+      <div class="cr-desc">Only 6 of 150 pass. Complaints per active connection run 8–28pp higher at every percentile. Unresolved beyond 48h is the specific driver — the 150 are not just slow, they're abandoning tickets.</div>
+    </div>
+    <div class="cr-card cr-3">
+      <div class="cr-rank">Priority 3 — Structural floor</div>
+      <div class="cr-domain">Install Execution</div>
+      <div class="cr-stat">−8pp</div>
+      <div class="cr-sub">install compliant rate vs rest</div>
+      <div class="cr-desc">Install ratio is 5–10pp lower at every percentile. Only 22 of 150 pass. This is the foundational capability — if a CSP can't convert leads to installs, the other metrics can't improve. Low PNM penetration (54% vs 72%) suggests limited visibility into why.</div>
+    </div>
+  </div>
+
+  <div class="note-box" style="margin-top:20px;">
+    <p><strong style="color:#111827;">What this is and isn't:</strong> This is where the capability reset effort should be sequenced — resolution first, complaint handling second, install execution third. The S Score data confirms this: 47% of the 150 score Below 88 on S Score (service quality) vs 28% of rest, a 19pp gap. T Score barely differentiates (55% Excellent for worst vs 51% rest), meaning churn risk is distributed — the 150 have a service execution problem, not uniquely a customer retention problem. The intervention is operational, not commercial.</p>
   </div>
 </section>
 
