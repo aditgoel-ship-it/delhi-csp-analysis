@@ -437,7 +437,114 @@
 
 
 <!-- ══════════════════════════════════════
-     6. PNM QUALITATIVE LENS
+     6. BOOKINGS / INTEREST / INSTALLS
+     ══════════════════════════════════════ -->
+<style>
+  .funnel-table { width: 100%; border-collapse: collapse; margin-top: 32px; }
+  .funnel-table th {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #9ca3af; padding: 0 16px 14px 16px; text-align: right; border-bottom: 2px solid #f0f0f0;
+  }
+  .funnel-table th:first-child { text-align: left; }
+  .funnel-table td {
+    padding: 18px 16px; font-size: 17px; font-weight: 700; color: #111827;
+    text-align: right; border-bottom: 1px solid #f0f0f0;
+  }
+  .funnel-table td:first-child { font-size: 15px; font-weight: 600; color: #4b5563; text-align: left; }
+  .funnel-table tr.row-worst td { background: #fff5f9; }
+  .funnel-table tr.row-worst td:first-child { color: #d92b90; font-weight: 700; }
+  .funnel-table .se-cell { font-size: 22px; }
+  .funnel-table .se-worst { color: #d92b90; }
+  .funnel-table .se-rest  { color: #059669; }
+  .funnel-table .se-total { color: #6b7280; }
+
+  .funnel-stage-row { display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
+  .fsr-card {
+    flex: 1; min-width: 200px; border-radius: 12px; padding: 22px 20px;
+    background: #fafafa; border: 1px solid #e5e7eb;
+  }
+  .fsr-card .fsr-stage { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #9ca3af; margin-bottom: 10px; }
+  .fsr-card .fsr-label { font-size: 13px; color: #6b7280; margin-bottom: 14px; }
+  .fsr-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .fsr-grp { font-size: 12px; color: #9ca3af; }
+  .fsr-val { font-size: 15px; font-weight: 800; }
+  .fsr-worst { color: #d92b90; }
+  .fsr-rest  { color: #059669; }
+  .fsr-delta { font-size: 13px; font-weight: 700; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e5e7eb; color: #4b5563; }
+</style>
+
+<section class="section">
+  <div class="tag"><span class="dot"></span>Market Performance — Jan 26 → Now</div>
+  <h2>The 150 are leaking demand<br>at <span class="pink">every stage of the funnel.</span></h2>
+  <p class="big-p">Since Jan 26, bookings, interest marking, and installs across Delhi — split by the two groups. Supply Efficiency = installs ÷ interests marked.</p>
+
+  <table class="funnel-table">
+    <thead>
+      <tr>
+        <th>Segment</th>
+        <th>Bookings</th>
+        <th>Interested</th>
+        <th>Installs</th>
+        <th>Supply Efficiency</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Delhi overall</td>
+        <td>6,141</td>
+        <td>2,594</td>
+        <td>902</td>
+        <td class="se-cell se-total">34.8%</td>
+      </tr>
+      <tr class="row-worst">
+        <td>Bottom 150</td>
+        <td>874</td>
+        <td>253</td>
+        <td>43</td>
+        <td class="se-cell se-worst">17.0%</td>
+      </tr>
+      <tr>
+        <td>Rest 653</td>
+        <td>5,267</td>
+        <td>2,341</td>
+        <td>859</td>
+        <td class="se-cell se-rest">36.7%</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="funnel-stage-row">
+    <div class="fsr-card">
+      <div class="fsr-stage">Stage 1</div>
+      <div class="fsr-label">Bookings → Interest<br><span style="color:#9ca3af; font-size:12px;">Do they show up for demand?</span></div>
+      <div class="fsr-row"><span class="fsr-grp">Bottom 150</span><span class="fsr-val fsr-worst">29%</span></div>
+      <div class="fsr-row"><span class="fsr-grp">Rest 653</span><span class="fsr-val fsr-rest">44%</span></div>
+      <div class="fsr-delta">−15pp · 71% of bookings ignored</div>
+    </div>
+    <div class="fsr-card">
+      <div class="fsr-stage">Stage 2</div>
+      <div class="fsr-label">Interest → Install<br><span style="color:#9ca3af; font-size:12px;">When they show up, do they deliver?</span></div>
+      <div class="fsr-row"><span class="fsr-grp">Bottom 150</span><span class="fsr-val fsr-worst">17%</span></div>
+      <div class="fsr-row"><span class="fsr-grp">Rest 653</span><span class="fsr-val fsr-rest">37%</span></div>
+      <div class="fsr-delta">−20pp · conversion at less than half the rate</div>
+    </div>
+    <div class="fsr-card" style="background:#fff5f9; border-color:#f9c0dc;">
+      <div class="fsr-stage">End-to-end</div>
+      <div class="fsr-label">Bookings → Install<br><span style="color:#9ca3af; font-size:12px;">Full pipeline yield</span></div>
+      <div class="fsr-row"><span class="fsr-grp">Bottom 150</span><span class="fsr-val fsr-worst">4.9%</span></div>
+      <div class="fsr-row"><span class="fsr-grp">Rest 653</span><span class="fsr-val fsr-rest">16.3%</span></div>
+      <div class="fsr-delta" style="color:#d92b90;">3× gap · 43 installs from 874 bookings</div>
+    </div>
+  </div>
+
+  <div class="bridge" style="margin-top:20px;">
+    <p>The two failure modes point to different interventions. CSPs failing at Stage 1 — not marking interest — are disengaged or disintermediating. That is not a capability problem; it belongs on the exit track. CSPs failing at Stage 2 — marking interest but not converting — have an execution gap: slot management, TAT, responsiveness. These are the candidates for a capability reset.</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     7. PNM QUALITATIVE LENS
      ══════════════════════════════════════ -->
 <section class="section">
   <div class="tag"><span class="dot"></span>PNM Denial Exercise — Qualitative Lens</div>
@@ -647,113 +754,7 @@
 
 
 <!-- ══════════════════════════════════════
-     8. BOOKINGS / INTEREST / INSTALLS
-     ══════════════════════════════════════ -->
-<style>
-  .funnel-table { width: 100%; border-collapse: collapse; margin-top: 32px; }
-  .funnel-table th {
-    font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-    color: #9ca3af; padding: 0 16px 14px 16px; text-align: right; border-bottom: 2px solid #f0f0f0;
-  }
-  .funnel-table th:first-child { text-align: left; }
-  .funnel-table td {
-    padding: 18px 16px; font-size: 17px; font-weight: 700; color: #111827;
-    text-align: right; border-bottom: 1px solid #f0f0f0;
-  }
-  .funnel-table td:first-child { font-size: 15px; font-weight: 600; color: #4b5563; text-align: left; }
-  .funnel-table tr.row-worst td { background: #fff5f9; }
-  .funnel-table tr.row-worst td:first-child { color: #d92b90; font-weight: 700; }
-  .funnel-table .se-cell { font-size: 22px; }
-  .funnel-table .se-worst { color: #d92b90; }
-  .funnel-table .se-rest  { color: #059669; }
-  .funnel-table .se-total { color: #6b7280; }
-
-  .funnel-stage-row { display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
-  .fsr-card {
-    flex: 1; min-width: 200px; border-radius: 12px; padding: 22px 20px;
-    background: #fafafa; border: 1px solid #e5e7eb;
-  }
-  .fsr-card .fsr-stage { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #9ca3af; margin-bottom: 10px; }
-  .fsr-card .fsr-label { font-size: 13px; color: #6b7280; margin-bottom: 14px; }
-  .fsr-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .fsr-grp { font-size: 12px; color: #9ca3af; }
-  .fsr-val { font-size: 15px; font-weight: 800; }
-  .fsr-worst { color: #d92b90; }
-  .fsr-rest  { color: #059669; }
-  .fsr-delta { font-size: 13px; font-weight: 700; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e5e7eb; color: #4b5563; }
-</style>
-
-<section class="section">
-  <div class="tag"><span class="dot"></span>Market Performance — Jan 26 → Now</div>
-  <h2>The 150 are leaking demand<br>at <span class="pink">every stage of the funnel.</span></h2>
-  <p class="big-p">Since Jan 26, bookings, interest marking, and installs across Delhi — split by the two groups. Supply Efficiency = installs ÷ interests marked.</p>
-
-  <table class="funnel-table">
-    <thead>
-      <tr>
-        <th>Segment</th>
-        <th>Bookings</th>
-        <th>Interested</th>
-        <th>Installs</th>
-        <th>Supply Efficiency</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Delhi overall</td>
-        <td>6,141</td>
-        <td>2,594</td>
-        <td>902</td>
-        <td class="se-cell se-total">34.8%</td>
-      </tr>
-      <tr class="row-worst">
-        <td>Bottom 150</td>
-        <td>874</td>
-        <td>253</td>
-        <td>43</td>
-        <td class="se-cell se-worst">17.0%</td>
-      </tr>
-      <tr>
-        <td>Rest 653</td>
-        <td>5,267</td>
-        <td>2,341</td>
-        <td>859</td>
-        <td class="se-cell se-rest">36.7%</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="funnel-stage-row">
-    <div class="fsr-card">
-      <div class="fsr-stage">Stage 1</div>
-      <div class="fsr-label">Bookings → Interest<br><span style="color:#9ca3af; font-size:12px;">Do they show up for demand?</span></div>
-      <div class="fsr-row"><span class="fsr-grp">Bottom 150</span><span class="fsr-val fsr-worst">29%</span></div>
-      <div class="fsr-row"><span class="fsr-grp">Rest 653</span><span class="fsr-val fsr-rest">44%</span></div>
-      <div class="fsr-delta">−15pp · 71% of bookings ignored</div>
-    </div>
-    <div class="fsr-card">
-      <div class="fsr-stage">Stage 2</div>
-      <div class="fsr-label">Interest → Install<br><span style="color:#9ca3af; font-size:12px;">When they show up, do they deliver?</span></div>
-      <div class="fsr-row"><span class="fsr-grp">Bottom 150</span><span class="fsr-val fsr-worst">17%</span></div>
-      <div class="fsr-row"><span class="fsr-grp">Rest 653</span><span class="fsr-val fsr-rest">37%</span></div>
-      <div class="fsr-delta">−20pp · conversion at less than half the rate</div>
-    </div>
-    <div class="fsr-card" style="background:#fff5f9; border-color:#f9c0dc;">
-      <div class="fsr-stage">End-to-end</div>
-      <div class="fsr-label">Bookings → Install<br><span style="color:#9ca3af; font-size:12px;">Full pipeline yield</span></div>
-      <div class="fsr-row"><span class="fsr-grp">Bottom 150</span><span class="fsr-val fsr-worst">4.9%</span></div>
-      <div class="fsr-row"><span class="fsr-grp">Rest 653</span><span class="fsr-val fsr-rest">16.3%</span></div>
-      <div class="fsr-delta" style="color:#d92b90;">3× gap · 43 installs from 874 bookings</div>
-    </div>
-  </div>
-
-  <div class="bridge" style="margin-top:20px;">
-    <p>The two failure modes point to different interventions. CSPs failing at Stage 1 — not marking interest — are disengaged or disintermediating. That is not a capability problem; it belongs on the exit track. CSPs failing at Stage 2 — marking interest but not converting — have an execution gap: slot management, TAT, responsiveness. These are the candidates for a capability reset.</p>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════
-     9. CSP APP ANGLE
+     8. CSP APP ANGLE
      ══════════════════════════════════════ -->
 <section class="section">
   <div class="tag"><span class="dot"></span>CSP App Rollout</div>
