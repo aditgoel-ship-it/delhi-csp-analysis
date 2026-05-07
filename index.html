@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delhi CSP — Service Quality Deep Dive</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #fff;
+    color: #111827;
+    line-height: 1.5;
+  }
+
+  .section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 72px 32px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .section:last-child { border-bottom: none; }
+
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; color: #d92b90; margin-bottom: 14px;
+  }
+  h1  { font-size: clamp(32px, 5vw, 56px); font-weight: 800; line-height: 1.1; color: #111827; }
+  h2  { font-size: clamp(24px, 3.5vw, 38px); font-weight: 800; line-height: 1.15; color: #111827; }
+  h3  { font-size: 17px; font-weight: 700; color: #374151; margin-bottom: 6px; }
+  p   { font-size: 16px; color: #6b7280; max-width: 680px; margin-top: 14px; }
+  .big-p { font-size: 19px; color: #4b5563; max-width: 720px; margin-top: 16px; line-height: 1.65; }
+
+  .pink   { color: #d92b90; }
+  .orange { color: #d97706; }
+  .green  { color: #059669; }
+  .muted  { color: #9ca3af; }
+
+  /* Tag */
+  .tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #fff0f9; border: 1px solid #f9c0dc; border-radius: 20px;
+    padding: 5px 14px; font-size: 11px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase; color: #d92b90; margin-bottom: 24px;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; background: #d92b90; }
+
+  /* ── Section 1: macro numbers ── */
+  .macro-row { display: flex; gap: 16px; margin-top: 44px; flex-wrap: wrap; }
+  .macro-card {
+    flex: 1; min-width: 150px; border-radius: 12px;
+    padding: 22px 20px; border-top: 3px solid;
+  }
+  .macro-card .mlabel { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #9ca3af; margin-bottom: 10px; }
+  .macro-card .mval   { font-size: 38px; font-weight: 800; line-height: 1; }
+  .macro-card .msub   { font-size: 12px; color: #9ca3af; margin-top: 8px; }
+  .macro-card .msub strong { font-weight: 600; }
+
+  /* ── Section 2: the split ── */
+  .split-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 36px; }
+  .sp-card { border-radius: 14px; padding: 28px 24px; }
+  .sp-bad  { background: #fff5f9; border: 1.5px solid #f9c0dc; }
+  .sp-good { background: #f0fdf4; border: 1.5px solid #a7f3d0; }
+  .sp-card .sp-tag   { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .sp-card .sp-count { font-size: 40px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+  .sp-card .sp-label { font-size: 14px; color: #6b7280; margin-bottom: 20px; }
+  .sp-card .sp-row   { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .sp-card .sp-row:last-child { border-bottom: none; }
+  .sp-card .sp-metric { font-size: 13px; color: #9ca3af; }
+  .sp-card .sp-val    { font-size: 18px; font-weight: 700; }
+  .sp-card .sp-context { font-size: 11px; color: #9ca3af; margin-left: 6px; }
+
+  /* Bridge box */
+  .bridge {
+    margin-top: 20px; padding: 20px 24px;
+    background: #fafafa; border: 1px solid #e5e7eb; border-radius: 10px;
+  }
+  .bridge p { font-size: 14px; color: #4b5563; max-width: none; margin: 0; line-height: 1.7; }
+
+  /* ── Section 3: how bad ── */
+  .bad-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px; }
+  .bt-card {
+    background: #fff5f9; border: 1px solid #f9c0dc;
+    border-radius: 12px; padding: 22px 18px; text-align: center;
+  }
+  .bt-card .btlabel { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #9ca3af; margin-bottom: 10px; }
+  .bt-card .btval   { font-size: 38px; font-weight: 900; color: #d92b90; line-height: 1; }
+  .bt-card .btsub   { font-size: 12px; color: #9ca3af; margin-top: 8px; line-height: 1.5; }
+
+  /* ── M6+ R15 ── */
+  .m6-wrap { display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-start; margin-top: 36px; }
+  .m6-quote {
+    flex: 1; min-width: 240px; font-size: 17px; font-weight: 500;
+    color: #374151; line-height: 1.7;
+    border-left: 3px solid #d92b90; padding-left: 20px;
+  }
+  .m6-rows  { flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
+  .m6-row   { display: flex; align-items: center; gap: 16px; }
+  .m6-glabel { font-size: 12px; font-weight: 700; width: 80px; }
+  .m6-bars  { width: 180px; }
+  .m6-head  { display: flex; justify-content: space-between; font-size: 11px; color: #9ca3af; margin-bottom: 4px; }
+  .m6-pair  { display: flex; gap: 8px; align-items: center; }
+  .m6-bwrap { flex: 1; }
+  .m6-bg    { background: #e5e7eb; border-radius: 4px; height: 8px; overflow: hidden; }
+  .m6-fill  { height: 100%; border-radius: 4px; }
+  .m6-num   { font-size: 11px; margin-top: 3px; }
+  .m6-arr   { font-size: 13px; color: #d1d5db; }
+  .m6-delta { font-size: 15px; font-weight: 700; width: 58px; text-align: right; }
+
+  /* ── Section 4: history ── */
+  .dec-box {
+    margin-top: 32px; padding: 24px 28px;
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+  }
+  .dec-box .dlabel { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #d97706; margin-bottom: 18px; }
+  .dec-stats { display: flex; gap: 40px; flex-wrap: wrap; }
+  .dec-stat .dv { font-size: 32px; font-weight: 900; color: #d97706; line-height: 1; }
+  .dec-stat .dl { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+
+  /* Collapse grid */
+  .collapse-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 32px; }
+  .cc {
+    background: #fff5f9; border: 1px solid #f9c0dc;
+    border-radius: 12px; padding: 22px 14px; text-align: center;
+  }
+  .cc .clabel { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #9ca3af; margin-bottom: 12px; }
+  .cc .cfrom  { font-size: 22px; font-weight: 800; color: #d97706; }
+  .cc .carrow { font-size: 20px; color: #d92b90; display: block; margin: 4px 0; }
+  .cc .cto    { font-size: 32px; font-weight: 900; color: #d92b90; }
+  .cc .cdelta { font-size: 12px; color: #d92b90; margin-top: 6px; font-weight: 600; }
+
+  /* ── Section 5: partners ── */
+  .hhll-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 32px; }
+  .hc { border-radius: 12px; padding: 22px 18px; }
+  .hc .hbucket { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .hc .hcount  { font-size: 42px; font-weight: 900; line-height: 1; }
+  .hc .hpct    { font-size: 13px; font-weight: 600; margin-top: 4px; opacity: 0.75; }
+  .hc .hdesc   { font-size: 13px; color: #4b5563; margin-top: 12px; line-height: 1.55; }
+  .hc .hcust   { font-size: 12px; font-weight: 700; margin-top: 8px; }
+  .hc .hfrozen {
+    font-size: 11px; margin-top: 12px; padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,0.07); color: #6b7280; line-height: 1.5;
+  }
+  .hc-chronic { background: #fff5f9; border: 1.5px solid #f9c0dc; }
+  .hc-det     { background: #fff8f0; border: 1.5px solid #fed7aa; }
+  .hc-reach   { background: #fffbeb; border: 1.5px solid #fde68a; }
+
+  .note-box { margin-top: 16px; padding: 16px 20px; background: #fafafa; border: 1px solid #e5e7eb; border-radius: 10px; }
+  .note-box p { font-size: 13px; color: #4b5563; max-width: none; margin: 0; line-height: 1.7; }
+
+  /* Zone pills */
+  .zone-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .zpill { background: #fafafa; border: 1px solid #e5e7eb; border-radius: 30px; padding: 7px 16px; }
+  .zpill .zn { font-size: 13px; font-weight: 600; color: #111827; }
+  .zpill .zc { font-size: 12px; color: #9ca3af; margin-left: 4px; }
+
+  /* ── App section ── */
+  .app-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 24px; }
+  .app-col { padding: 22px; border-radius: 10px; }
+  .app-col-bad  { background: #fff5f9; border: 1px solid #f9c0dc; }
+  .app-col-good { background: #f0fdf4; border: 1px solid #a7f3d0; }
+  .app-col .acl { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .app-col p { font-size: 14px; color: #4b5563; max-width: none; margin-top: 0; line-height: 1.7; }
+
+  /* WIP */
+  .wip-box {
+    background: #fafafa; border: 1.5px dashed #d1d5db;
+    border-radius: 14px; padding: 44px 32px; text-align: center; margin-top: 32px;
+  }
+  .wip-badge {
+    display: inline-block; background: #f3f4f6; color: #9ca3af;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 20px; margin-bottom: 16px;
+  }
+  .wip-box h3 { font-size: 18px; color: #374151; margin-bottom: 10px; }
+  .wip-box p  { font-size: 14px; color: #9ca3af; max-width: 520px; margin: 0 auto; }
+
+  /* Remove 150 strip */
+  .excl-strip {
+    margin-top: 18px; padding: 18px 22px; background: #f0fdf4;
+    border: 1px solid #a7f3d0; border-radius: 10px;
+    display: flex; align-items: center; gap: 28px; flex-wrap: wrap;
+  }
+  .excl-strip .elabel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #059669; white-space: nowrap; }
+  .excl-strip .estats { flex: 1; display: flex; gap: 32px; flex-wrap: wrap; }
+  .excl-strip .ev { font-size: 24px; font-weight: 800; color: #059669; }
+  .excl-strip .el { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+  .footer {
+    max-width: 1000px; margin: 0 auto; padding: 28px 32px;
+    font-size: 11px; color: #d1d5db; text-align: center; line-height: 1.9;
+    border-top: 1px solid #f0f0f0;
+  }
+</style>
+</head>
+<body>
+
+
+<!-- ══════════════════════════════════════
+     1. THE SPLIT — 83K OK, 8K NOT
+     ══════════════════════════════════════ -->
+<section class="section">
+  <div class="eyebrow">Delhi CSP — Service Quality Analysis &nbsp;·&nbsp; May 2026</div>
+  <h1>Delhi has 91K customers left.<br>83K are fine. <span class="pink">7,905 are not.</span></h1>
+  <p class="big-p">Delhi's base dropped from 1,28,180 to 91,154 since December — market-wide, driven by PayG migration. That's a separate workstream. Within the 91K who remain, the service quality picture splits sharply: 83K are served by partners at or near baseline, and 7,905 are with <strong>150 specific CSPs</strong> whose service has collapsed.</p>
+
+  <div class="split-pair">
+    <div class="sp-card sp-good">
+      <div class="sp-tag" style="color:#059669;">653 partners — healthy</div>
+      <div class="sp-count green">83,249</div>
+      <div class="sp-label">customers — 91% of Delhi's active base</div>
+      <div class="sp-row">
+        <span class="sp-metric">C/1000 (weekly)</span>
+        <span><span class="sp-val orange">139.7</span><span class="sp-context">BL 111 — elevated but stable</span></span>
+      </div>
+      <div class="sp-row">
+        <span class="sp-metric">TAT on-time</span>
+        <span><span class="sp-val green">79.0%</span><span class="sp-context">BL 81.8% — 3pp gap, workable</span></span>
+      </div>
+      <div class="sp-row">
+        <span class="sp-metric">R15 Renewal</span>
+        <span><span class="sp-val green">89.1%</span><span class="sp-context">Above baseline</span></span>
+      </div>
+      <div class="sp-row">
+        <span class="sp-metric">Loyal cust. renewal</span>
+        <span><span class="sp-val green">89.4%</span><span class="sp-context">Holding steady</span></span>
+      </div>
+    </div>
+
+    <div class="sp-card sp-bad">
+      <div class="sp-tag pink">150 CSPs — failing</div>
+      <div class="sp-count pink">7,905</div>
+      <div class="sp-label">customers — 9% of Delhi's active base</div>
+      <div class="sp-row">
+        <span class="sp-metric">C/1000 (weekly)</span>
+        <span><span class="sp-val pink">295.5</span><span class="sp-context">Nearly 3× Wiom baseline</span></span>
+      </div>
+      <div class="sp-row">
+        <span class="sp-metric">TAT on-time</span>
+        <span><span class="sp-val pink">52.6%</span><span class="sp-context">Nearly half of issues unresolved</span></span>
+      </div>
+      <div class="sp-row">
+        <span class="sp-metric">R15 Renewal</span>
+        <span><span class="sp-val pink">73.3%</span><span class="sp-context">1 in 4 not renewing</span></span>
+      </div>
+      <div class="sp-row">
+        <span class="sp-metric">Loyal cust. renewal</span>
+        <span><span class="sp-val pink">77.2%</span><span class="sp-context">Collapsing — down 12pp</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="excl-strip">
+    <div class="elabel">Remove the 150 CSPs →</div>
+    <div class="estats">
+      <div><div class="ev">79.0%</div><div class="el">Delhi TAT — closes 60% of gap vs baseline</div></div>
+      <div><div class="ev">89.1%</div><div class="el">Delhi R15 — above baseline</div></div>
+      <div><div class="ev">140</div><div class="el">Delhi C/1000 — vs baseline 111</div></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     3. LOYAL CUSTOMERS LEAVING
+     ══════════════════════════════════════ -->
+<section class="section">
+  <div class="tag"><span class="dot"></span>The Customer Signal</div>
+  <h2>It's bad enough that even their<br>most loyal customers are <span class="pink">walking away</span>.</h2>
+  <p class="big-p">M6+ R15 tracks renewal for customers with 6+ months tenure — people who have renewed multiple times and chosen to stay. Measured against the same April window in 2024 to rule out seasonality.</p>
+
+  <div class="m6-wrap">
+    <div class="m6-quote">
+      The rest of Delhi's customers moved <strong style="color:#059669;">+0.6pp</strong> over two years. April is not a bad renewal month.<br><br>
+      Customers with these 150 CSPs dropped <strong style="color:#d92b90;">−10.5pp</strong> in the same window. Loyal, established customers — who had stayed through multiple renewals — are now choosing not to come back.<br><br>
+      <strong>This is customer judgment on service quality.</strong>
+    </div>
+    <div class="m6-rows">
+      <div class="m6-row">
+        <div class="m6-glabel pink">150 CSP<br>customers</div>
+        <div class="m6-bars">
+          <div class="m6-head"><span>Apr 2024</span><span>Apr 2026</span></div>
+          <div class="m6-pair">
+            <div class="m6-bwrap">
+              <div class="m6-bg"><div class="m6-fill" style="width:87.7%;background:#d97706;"></div></div>
+              <div class="m6-num" style="color:#9ca3af;">87.7%</div>
+            </div>
+            <div class="m6-arr">→</div>
+            <div class="m6-bwrap">
+              <div class="m6-bg"><div class="m6-fill" style="width:77.2%;background:#d92b90;"></div></div>
+              <div class="m6-num" style="color:#d92b90;">77.2%</div>
+            </div>
+          </div>
+        </div>
+        <div class="m6-delta pink">−10.5pp</div>
+      </div>
+      <div class="m6-row">
+        <div class="m6-glabel green">Rest of<br>Delhi</div>
+        <div class="m6-bars">
+          <div class="m6-head"><span>Apr 2024</span><span>Apr 2026</span></div>
+          <div class="m6-pair">
+            <div class="m6-bwrap">
+              <div class="m6-bg"><div class="m6-fill" style="width:88.8%;background:#059669;"></div></div>
+              <div class="m6-num" style="color:#9ca3af;">88.8%</div>
+            </div>
+            <div class="m6-arr">→</div>
+            <div class="m6-bwrap">
+              <div class="m6-bg"><div class="m6-fill" style="width:89.4%;background:#059669;"></div></div>
+              <div class="m6-num" style="color:#059669;">89.4%</div>
+            </div>
+          </div>
+        </div>
+        <div class="m6-delta green">+0.6pp</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bridge" style="margin-top:28px;">
+    <p><strong style="color:#111827;">On active base loss:</strong> The 7,905 customers have dropped from 15,891 in December — a 50% decline. Market-wide decline explains 26pp of that (the same rate the rest of Delhi lost). The remaining ~24pp is customers leaving specifically because of service failure. The M6+ R15 data confirms it.</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     4. THESE 150 WERE BAD BEFORE PAYG
+     ══════════════════════════════════════ -->
+<section class="section">
+  <div class="tag"><span class="dot"></span>The History</div>
+  <h2>These 150 CSPs were already<br>failing customers before PayG. <span class="pink">Then it got worse.</span></h2>
+  <p class="big-p">94% of these 150 partners ranked as Delhi's worst performers in December — two months before the PayG pivot on January 26. This is not a transition story. These partners were structurally bad before anything changed.</p>
+
+  <div class="dec-box">
+    <div class="dlabel">Their customers' experience in December — already below baseline before PayG</div>
+    <div class="dec-stats">
+      <div class="dec-stat">
+        <div class="dv">191.8</div>
+        <div class="dl">C/1000 &nbsp;·&nbsp; baseline 111 &nbsp;·&nbsp; already +73%</div>
+      </div>
+      <div class="dec-stat">
+        <div class="dv">70.3%</div>
+        <div class="dl">TAT on-time &nbsp;·&nbsp; baseline 81.8% &nbsp;·&nbsp; already −11.5pp</div>
+      </div>
+      <div class="dec-stat">
+        <div class="dv">85.0%</div>
+        <div class="dl">R15 renewal &nbsp;·&nbsp; baseline ~88% &nbsp;·&nbsp; already below</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="big-p" style="margin-top:36px;">Since December, the experience for these customers has deteriorated sharply — while the rest of Delhi has held steady.</p>
+
+  <div class="collapse-grid">
+    <div class="cc">
+      <div class="clabel">C / 1000</div>
+      <div class="cfrom">191.8</div>
+      <span class="carrow">↓</span>
+      <div class="cto">295.5</div>
+      <div class="cdelta">+54%</div>
+    </div>
+    <div class="cc">
+      <div class="clabel">TAT on-time</div>
+      <div class="cfrom">70.3%</div>
+      <span class="carrow">↓</span>
+      <div class="cto">52.6%</div>
+      <div class="cdelta">−18pp</div>
+    </div>
+    <div class="cc">
+      <div class="clabel">R15 Renewal</div>
+      <div class="cfrom">85.0%</div>
+      <span class="carrow">↓</span>
+      <div class="cto">73.3%</div>
+      <div class="cdelta">−12pp</div>
+    </div>
+    <div class="cc">
+      <div class="clabel">Customers lost</div>
+      <div class="cfrom">15,891</div>
+      <span class="carrow">↓</span>
+      <div class="cto">7,905</div>
+      <div class="cdelta">−50% vs market −26%</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     5. WHO THESE 150 CSPs ARE
+     ══════════════════════════════════════ -->
+<section class="section">
+  <div class="tag"><span class="dot"></span>The Partners</div>
+  <h2>Who are these 150 CSPs —<br>and how reachable are they?</h2>
+  <p class="big-p">Classified by SLA performance and app engagement — cross-checked against a January frozen snapshot (before the collapse) to confirm the classification isn't driven by recent behaviour alone.</p>
+
+  <div class="hhll-grid">
+    <div class="hc hc-chronic">
+      <div class="hbucket pink">Chronic</div>
+      <div class="hcount pink">47</div>
+      <div class="hpct pink">31% of the 150</div>
+      <div class="hdesc">Bad SLA + disengaged in both <strong>January and April</strong>. Structurally non-functional — predates the collapse.</div>
+      <div class="hcust" style="color:#d92b90;">~2,900 customers</div>
+      <div class="hfrozen">Were LL in frozen Jan snapshot AND LL now. Disengagement is not a product of their current metrics — it was already there.</div>
+    </div>
+
+    <div class="hc hc-det">
+      <div class="hbucket orange">Deteriorated</div>
+      <div class="hcount orange">24</div>
+      <div class="hpct orange">16% of the 150</div>
+      <div class="hdesc">Were functional in January — good SLA, app engaged. Something broke between Jan and Apr.</div>
+      <div class="hcust" style="color:#d97706;">~1,500 customers</div>
+      <div class="hfrozen">Were HH or HL in frozen Jan snapshot. Different root cause — these are the rescue cases.</div>
+    </div>
+
+    <div class="hc hc-reach">
+      <div class="hbucket" style="color:#92400e;">Reachable</div>
+      <div class="hcount" style="color:#92400e;">63</div>
+      <div class="hpct" style="color:#92400e;">42% of the 150</div>
+      <div class="hdesc">Bad SLA but opening the app. The channel to reach them already exists.</div>
+      <div class="hcust" style="color:#92400e;">3,309 customers</div>
+      <div class="hfrozen">Currently LH. Push notifications and PTL call prompts can reach these without BDM visits.</div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <p><strong style="color:#111827;">The remaining 16:</strong> 13 partners show good SLA in the current period — they're in the bottom 150 on renewal and complaint metrics, not on resolution time. Different problem. 2 are negligible.</p>
+  </div>
+
+  <div style="margin-top:28px;">
+    <h3>Zone distribution</h3>
+    <div class="zone-row">
+      <div class="zpill"><span class="zn">North Delhi</span><span class="zc">49 partners · 25% of zone</span></div>
+      <div class="zpill"><span class="zn">East Delhi 2</span><span class="zc">38 partners · 21%</span></div>
+      <div class="zpill"><span class="zn">South Delhi</span><span class="zc">25 partners · 16%</span></div>
+      <div class="zpill"><span class="zn">East Delhi 1</span><span class="zc">20 partners · 14%</span></div>
+      <div class="zpill"><span class="zn">West Delhi</span><span class="zc">18 partners · 11%</span></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     6. PNM QUALITATIVE LENS
+     ══════════════════════════════════════ -->
+<section class="section">
+  <div class="tag"><span class="dot"></span>PNM Denial Exercise — Qualitative Lens</div>
+  <h2>A monitoring device was offered to all Delhi partners.<br>247 denied. What they said adds a qualitative layer.</h2>
+  <p class="big-p">The PNM exercise covered all Delhi partners. 247 had denied or had no ping — this analysis is a sample of those denials. Of the 247, 136 fall within our Delhi composite scope (bottom 150 + rest 653). When mapped against the two groups, the denial reasons add something the service numbers alone don't show. One caveat: the team deliberately called fewer LL partners, so the bottom 150 is likely underrepresented here.</p>
+
+  <!-- Coverage strip -->
+  <div style="margin-top:36px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
+    <div style="background:#fafafa; border:1px solid #e5e7eb; border-radius:12px; padding:20px 18px; text-align:center;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#9ca3af; margin-bottom:10px;">Total denied (Delhi scope)</div>
+      <div style="font-size:38px; font-weight:900; color:#111827; line-height:1;">136</div>
+      <div style="font-size:12px; color:#9ca3af; margin-top:8px;">of 247 total; 111 outside Delhi</div>
+    </div>
+    <div style="background:#fff5f9; border:1.5px solid #f9c0dc; border-radius:12px; padding:20px 18px; text-align:center;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#d92b90; margin-bottom:10px;">From bottom 150</div>
+      <div style="font-size:38px; font-weight:900; color:#d92b90; line-height:1;">38</div>
+      <div style="font-size:12px; color:#9ca3af; margin-top:8px;">25% of the 150 · 28% of Delhi denials</div>
+    </div>
+    <div style="background:#f0fdf4; border:1.5px solid #a7f3d0; border-radius:12px; padding:20px 18px; text-align:center;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#059669; margin-bottom:10px;">From rest 653</div>
+      <div style="font-size:38px; font-weight:900; color:#059669; line-height:1;">98</div>
+      <div style="font-size:12px; color:#9ca3af; margin-top:8px;">15% of the 653 · 72% of Delhi denials</div>
+    </div>
+  </div>
+
+  <div class="note-box" style="margin-top:14px;">
+    <p>Bottom 150 denial rate (25%) is higher than rest 653 (15%) — but only 22 of the 38 bottom 150 denials have a coded reason. 42% gave no reason at all, which is itself a signal of disengagement. Percentages below are based on <strong>coded denials only</strong>: 22 from bottom 150, 67 from rest 653.</p>
+  </div>
+
+  <!-- Reason table -->
+  <div style="margin-top:32px; overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:14px;">
+      <thead>
+        <tr style="border-bottom:2px solid #e5e7eb;">
+          <th style="text-align:left; padding:10px 12px; color:#6b7280; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:1px;">Reason for denial</th>
+          <th style="text-align:center; padding:10px 12px; color:#d92b90; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:1px;">Bottom 150<br><span style="font-weight:400; font-size:11px;">(n=22 coded)</span></th>
+          <th style="text-align:center; padding:10px 12px; color:#059669; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:1px;">Rest 653<br><span style="font-weight:400; font-size:11px;">(n=67 coded)</span></th>
+          <th style="text-align:left; padding:10px 12px; color:#6b7280; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:1px;">What it means</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f0f0f0; background:#fff5f9;">
+          <td style="padding:12px; font-weight:600; color:#111827;">No longer working / exiting</td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#d92b90;">5 &nbsp;<span style="font-size:13px; font-weight:600;">(23%)</span></td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#059669;">4 &nbsp;<span style="font-size:13px; font-weight:600;">(6%)</span></td>
+          <td style="padding:12px; color:#6b7280; font-size:13px; line-height:1.6;">Exit rate is 4× higher in the bottom 150. These partners aren't refusing the device — the partnership is over. Confirms the chronic group from our HH/LL data.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0;">
+          <td style="padding:12px; font-weight:600; color:#111827;">Disgruntled (leads, commissions, policy)</td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#d92b90;">6 &nbsp;<span style="font-size:13px; font-weight:600;">(27%)</span></td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#6b7280;">23 &nbsp;<span style="font-size:13px; font-weight:600;">(34%)</span></td>
+          <td style="padding:12px; color:#6b7280; font-size:13px; line-height:1.6;">Rates are similar — 27% vs 34%. This is a <strong style="color:#111827;">universal Wiom commercial grievance</strong>, not specific to the bad partners. Leads dried up, commissions changed, customers migrated without notice. Both groups feel it.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0;">
+          <td style="padding:12px; font-weight:600; color:#111827;">Mistrust (info & data)</td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#d92b90;">8 &nbsp;<span style="font-size:13px; font-weight:600;">(36%)</span></td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#6b7280;">23 &nbsp;<span style="font-size:13px; font-weight:600;">(34%)</span></td>
+          <td style="padding:12px; color:#6b7280; font-size:13px; line-height:1.6;">Almost identical. Also a <strong style="color:#111827;">universal issue</strong> — not a differentiator. In the rest 653, concentrated in large multi-ISP partners genuinely protecting non-Wiom network data. The script's "do not explain" guardrail is creating ~33 of these denials.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0; background:#f0fdf4;">
+          <td style="padding:12px; font-weight:600; color:#111827;">Willing (operational miss — not a real denial)</td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#9ca3af;">2 &nbsp;<span style="font-size:13px; font-weight:600;">(9%)</span></td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#059669;">11 &nbsp;<span style="font-size:13px; font-weight:600;">(16%)</span></td>
+          <td style="padding:12px; color:#6b7280; font-size:13px; line-height:1.6;">Rest 653 has 11 large partners (avg. 225 active base) who said come back — Bhatia Cable (550), AVI Network (314), MGN Network (404). Owner wasn't in, power was off. These are misclassified as denials. Almost absent in the bottom 150.</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0;">
+          <td style="padding:12px; font-weight:600; color:#111827;">Cited 0 / low user base</td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#9ca3af;">0 &nbsp;<span style="font-size:13px; font-weight:600;">(0%)</span></td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#6b7280;">3 &nbsp;<span style="font-size:13px; font-weight:600;">(4%)</span></td>
+          <td style="padding:12px; color:#6b7280; font-size:13px; line-height:1.6;">Partners with near-zero base who can't justify OLT real estate for a dead partnership. Entirely in rest 653.</td>
+        </tr>
+        <tr>
+          <td style="padding:12px; font-weight:600; color:#111827;">No space / no power point</td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#9ca3af;">1 &nbsp;<span style="font-size:13px; font-weight:600;">(5%)</span></td>
+          <td style="padding:12px; text-align:center; font-size:18px; font-weight:800; color:#6b7280;">3 &nbsp;<span style="font-size:13px; font-weight:600;">(4%)</span></td>
+          <td style="padding:12px; color:#6b7280; font-size:13px; line-height:1.6;">Infra constraint. Likely a secondary reason in most cases.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Two honest takeaways -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:24px;">
+    <div style="background:#fff5f9; border:1.5px solid #f9c0dc; border-radius:12px; padding:22px 20px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#d92b90; margin-bottom:10px;">Bottom 150 — what this adds</div>
+      <p style="font-size:14px; color:#4b5563; line-height:1.7; margin:0;">Exit rate (23%) is 4× the rest 653. The 42% uncoded block — partners who gave no reason at all — is itself a disengagement signal. <strong style="color:#111827;">But disgruntled and mistrust rates are the same across both groups</strong>, so commercial frustration is not unique to the failing partners. The PNM data confirms the trajectory; it doesn't add a new diagnosis.</p>
+    </div>
+    <div style="background:#f0fdf4; border:1.5px solid #a7f3d0; border-radius:12px; padding:22px 20px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#059669; margin-bottom:10px;">Rest 653 — what this adds</div>
+      <p style="font-size:14px; color:#4b5563; line-height:1.7; margin:0;">The service numbers look fine, but 34% of coded denials here are commercial grievances from currently-performing partners. <strong style="color:#111827;">This is not in the service metrics.</strong> 11 large partners (Bhatia 550, AVI 314, MGN 404) weren't real denials — just missed visits. The commercial trust signal is worth watching separately from service quality.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     7. CSP APP ANGLE
+     ══════════════════════════════════════ -->
+<section class="section">
+  <div class="tag"><span class="dot"></span>CSP App Rollout</div>
+  <h2>As we roll the CSP app — track<br>the two groups separately.</h2>
+  <p class="big-p">If we measure Delhi as one number, these 7,905 customers will keep dragging every metric — and make the app's impact on the other 83,249 invisible.</p>
+
+  <div class="app-compare">
+    <div class="app-col app-col-bad">
+      <div class="acl pink">Measuring Delhi whole</div>
+      <p>The failing 7,905 customers suppress every aggregate. TAT looks worse than it is. Renewal looks worse. Progress is unreadable. We risk calling the app's rollout ineffective when it's working for 91% of the base.</p>
+    </div>
+    <div class="app-col app-col-good">
+      <div class="acl" style="color:#059669;">Tracking separately</div>
+      <p>83,249 customers give us the clean signal for what the app is doing. The 7,905 sit on a separate intervention track. The 63 reachable CSPs (bad SLA, app open) can be reached directly through push notifications — the app is their intervention channel too.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     7. ACTION — WIP
+     ══════════════════════════════════════ -->
+<section class="section">
+  <div class="tag"><span class="dot"></span>Action</div>
+  <h2>What does the OS say about<br>each of these 150 CSPs?</h2>
+  <p class="big-p">Mapping the 150 against OS operating status — earning bands, capability resets, strike thresholds — to identify which partners are already flagged internally and where the escalation case is strongest.</p>
+
+  <div class="wip-box">
+    <div class="wip-badge">⏳ &nbsp; In Progress</div>
+    <h3>OS Simulation Results — Incoming</h3>
+    <p>Once the OS simulation runs against these 150 partner IDs, this section maps each partner to their OS status. For the chronic group especially — if they're already flagged internally, the offboarding case writes itself.</p>
+  </div>
+</section>
+
+
+<div class="footer">
+  Data: Metabase / Snowflake PROD_DB &nbsp;·&nbsp; Dec baseline = Dec 1–31, 2025 &nbsp;·&nbsp; Current = Apr 27–May 3, 2026
+  <br>Composite-ranked 150 from 803 active Delhi partners · min 10 Dec customers · percentile score across 5 metrics
+  <br>M6+ R15: same Apr 13–30 expiry window, 3 years · HH/LL frozen: Jan 8–26 · Current HH/LL: Apr 14–May 3
+  <br><br>Prepared by Adit Goel &nbsp;·&nbsp; adit.goel@wiom.in &nbsp;·&nbsp; May 2026
+</div>
+
+</body>
+</html>
